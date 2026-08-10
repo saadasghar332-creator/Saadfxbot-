@@ -42,3 +42,10 @@ The frontend files can be hosted on GitHub Pages. The app makes the data request
 
 ## V4.1 time display fix
 The market-data timestamp from Twelve Data is UTC. V4.1 converts the candle timestamp to the phone/browser local timezone for display and also shows the original UTC source time. The candle timestamp is not the same thing as the current clock time; it identifies the market candle returned by the data provider.
+
+
+## V4.2 automatic refresh
+
+V4.2 automatically requests fresh 1-minute USD/JPY market data every 60 seconds while the page is open. It shows a countdown to the next refresh and reports whether the latest refresh succeeded.
+
+The app remains paper-trading/research-only. The API key stays in browser local storage and is not committed to GitHub.

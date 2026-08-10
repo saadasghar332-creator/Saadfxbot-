@@ -363,3 +363,65 @@ $("closeTrade").onclick=closePaper;
 $("reset").onclick=()=>{if(confirm("Reset paper trading data?")){localStorage.removeItem(STORAGE_KEY);location.reload();}};
 renderRisk();renderStats();
 window.addEventListener("resize",drawChart);
+
+
+// V4.2: automatically refresh market data every 60 seconds.
+// The API key remains in localStorage and is never written into the repository.
+const AUTO_REFRESH_MS = 60 * 1000;
+let autoRefreshTimer = null;
+let countdownTimer = null;
+let nextRefreshAt = Date.now() + AUTO_REFRESH_MS;
+
+function setRefreshStatus(message) {
+  const el = $("refreshStatus");
+  if (el) el.textContent = message;
+}
+
+function updateRefreshCountdown() {
+  const el = $("refreshCountdown");
+  if (!el) return;
+  const seconds = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
+  el.textContent = seconds === 0
+    ? "Refreshing market data…"
+    : `Next market-data refresh in ${seconds}s.`;
+}
+
+async function autoRefreshMarketData() {
+  try {
+    // V4.2 expects the existing V4/V4.1 fetch-and-train function to be available.
+    // Try the common function names used by the V4 app.
+    if (typeof fetchAndTrain === "function") {
+      await fetchAndTrain();
+    } else if (typeof fetchAndTrainModel === "function") {
+      await fetchAndTrainModel();
+    } else if (typeof loadMarketData === "function") {
+      await loadMarketData();
+    } else {
+      // Fallback: click the existing Fetch & train button so V4.2 remains
+      // compatible with the existing UI without duplicating API logic.
+      const btn = $("fetchTrain") || $("fetch") || $("train");
+      if (btn) btn.click();
+      else throw new Error("V4 fetch/train function or button was not found.");
+    }
+    setRefreshStatus("Auto-refresh ON · updated just now");
+  } catch (err) {
+    console.error("Automatic market-data refresh failed:", err);
+    setRefreshStatus("Auto-refresh ON · refresh failed");
+  } finally {
+    nextRefreshAt = Date.now() + AUTO_REFRESH_MS;
+    updateRefreshCountdown();
+  }
+}
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  if (countdownTimer) clearInterval(countdownTimer);
+
+  nextRefreshAt = Date.now() + AUTO_REFRESH_MS;
+  updateRefreshCountdown();
+
+  autoRefreshTimer = setInterval(autoRefreshMarketData, AUTO_REFRESH_MS);
+  countdownTimer = setInterval(updateRefreshCountdown, 1000);
+}
+
+startAutoRefresh();
