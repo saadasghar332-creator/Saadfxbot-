@@ -1,53 +1,27 @@
-# USD/JPY Trading App — Paper Trading MVP
+# USD/JPY Trading Web App
 
-A mobile-friendly Flutter frontend with a FastAPI/Python backend.
+A mobile-friendly paper-trading dashboard that can be opened directly in Chrome.
 
-## Safety
-This project is PAPER TRADING / ANALYSIS ONLY. It does not place broker orders.
-The backend returns demo market data unless you connect your own market-data source.
+## Run locally
 
-## Structure
+Just open `index.html` in a browser.
 
-- `backend/` — FastAPI API, signal engine, risk calculator
-- `mobile/` — Flutter Android app
-- `data/` — optional CSV files
-- `docs/` — architecture notes
+## Publish free with GitHub Pages
 
-## Run backend
+1. Create a GitHub repository.
+2. Upload `index.html`, `style.css`, `app.js`, and `README.md`.
+3. Repository Settings -> Pages.
+4. Under Build and deployment choose `Deploy from a branch`.
+5. Select `main` and `/root`.
+6. Save.
+7. GitHub will provide the public Pages address.
 
-```bash
-cd backend
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+## Current status
 
-Open `http://127.0.0.1:8000/docs`.
+This is a front-end MVP. The signal engine is a DEMO placeholder and does not predict real market direction.
 
-## Run Flutter
+## Next upgrade
 
-Install Flutter and Android Studio/SDK first.
+Connect the UI to the FastAPI backend and replace the demo signal with the validated ML model. Use a proper licensed market-data provider for live data. Keep paper trading enabled until extensive walk-forward and live-paper testing is complete.
 
-```bash
-cd mobile
-flutter pub get
-flutter run
-```
-
-For a physical Android phone, set `API_BASE_URL` in
-`mobile/lib/config.dart` to the computer's LAN IP, for example:
-
-`http://192.168.1.10:8000`
-
-The phone and computer must be on the same network.
-
-## Next production steps
-
-1. Replace demo candles with a licensed/live market-data provider.
-2. Add historical data storage.
-3. Train and validate the ML model with walk-forward testing.
-4. Add authentication and HTTPS.
-5. Add persistent paper-trade storage.
-6. Add broker integration only after extensive paper testing.
+Do not put API keys, broker passwords, or secret tokens in this repository.

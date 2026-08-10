@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>USD/JPY Trading Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>USD/JPY Trader</h1>
+    <p>1-minute paper-trading dashboard</p>
+  </div>
+  <span class="badge">PAPER ONLY</span>
+</header>
+
+<main>
+  <section class="grid">
+    <div class="card price">
+      <span>USD/JPY</span>
+      <strong id="price">156.245</strong>
+      <small id="change">Demo market data</small>
+    </div>
+
+    <div class="card signal-card">
+      <span>Signal</span>
+      <strong id="signal" class="no-trade">NO TRADE</strong>
+      <small id="reason">Waiting for analysis</small>
+    </div>
+
+    <div class="card">
+      <span>UP probability</span>
+      <strong id="up">50.0%</strong>
+      <div class="bar"><i id="upbar"></i></div>
+    </div>
+
+    <div class="card">
+      <span>DOWN probability</span>
+      <strong id="down">50.0%</strong>
+      <div class="bar"><i id="downbar"></i></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Risk calculator</h2>
+    <div class="form-grid">
+      <label>Account balance
+        <input id="balance" type="number" value="1000">
+      </label>
+      <label>Risk %
+        <input id="risk" type="number" value="1" step="0.1">
+      </label>
+      <label>Stop loss (pips)
+        <input id="stop" type="number" value="5">
+      </label>
+      <label>Take profit (pips)
+        <input id="target" type="number" value="10">
+      </label>
+    </div>
+    <div class="risk-result">
+      <span>Risk amount</span><b id="riskAmount">$10.00</b>
+      <span>Risk/reward</span><b id="rr">1:2.00</b>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <h2>Paper trading</h2>
+      <button id="refresh">Refresh analysis</button>
+    </div>
+    <div class="paper-controls">
+      <button class="buy" id="paperBuy">PAPER BUY</button>
+      <button class="sell" id="paperSell">PAPER SELL</button>
+      <button class="neutral" id="closeTrade">CLOSE</button>
+    </div>
+    <p id="tradeStatus">No open paper position.</p>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <h2>Performance</h2>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="stats">
+      <div><span>Balance</span><b id="pBalance">$1,000.00</b></div>
+      <div><span>Trades</span><b id="trades">0</b></div>
+      <div><span>Wins</span><b id="wins">0</b></div>
+      <div><span>Losses</span><b id="losses">0</b></div>
+      <div><span>Win rate</span><b id="winrate">0%</b></div>
+      <div><span>Max drawdown</span><b id="dd">0%</b></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Equity</h2>
+    <canvas id="chart" height="180"></canvas>
+  </section>
+
+  <section class="warning">
+    <b>Important:</b> This is a research and paper-trading app. The current signal is a demo placeholder and is NOT a reliable market prediction. Do not connect real money until the model, data, execution and risk controls have been independently tested.
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
