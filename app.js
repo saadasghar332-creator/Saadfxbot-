@@ -273,20 +273,46 @@ function renderAnalysis(a){
   $("price").textContent=a.price.toFixed(3);
   $("up").textContent=(a.up*100).toFixed(1)+"%";
   $("down").textContent=(a.down*100).toFixed(1)+"%";
+
   $("upbar").style.width=(a.up*100)+"%";
   $("downbar").style.width=(a.down*100)+"%";
+
   $("signal").textContent=a.signal;
-  $("signal").className=a.signal==="UP"?"up":a.signal==="DOWN"?"down":"no-trade";
-  $("reason").textContent=a.signal==="NO TRADE"
-    ? `Below model threshold ${(model.threshold*100).toFixed(0)}%.`
-    : `Model confidence ${(Math.max(a.up,a.down)*100).toFixed(1)}%.`;
+  $("signal").className =
+    a.signal==="UP" ? "up" :
+    a.signal==="DOWN" ? "down" :
+    "no-trade";
+
+  $("reason").textContent =
+    a.signal==="NO TRADE"
+      ? `Below model threshold ${(model.threshold*100).toFixed(0)}%.`
+      : `Model confidence ${(Math.max(a.up,a.down)*100).toFixed(1)}%.`;
+
   $("price").dataset.price=a.price;
-  const t=formatCandleTime(candles.at(-1).time);
-  const target=getPredictionTarget();
-  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
-  $("change").textContent=`Prediction for: ${formatDate(target,tz)} · Latest candle: ${t.local}`;
-  const targetEl=$("predictionTarget");
-  if(targetEl) targetEl.textContent=`Next 1-minute candle: ${formatDate(target,tz)}`;
+
+  // Actual latest candle from the market-data provider
+  const t = candles.length
+    ? formatCandleTime(candles.at(-1).time)
+    : null;
+
+  // IMPORTANT:
+  // Prediction target is based on the phone/browser CURRENT time,
+  // NOT the timestamp of the latest market candle.
+  const now = new Date();
+  const target = new Date(now.getTime() + 60 * 1000);
+
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  $("change").textContent =
+    `Prediction for: ${formatDate(target,tz)} · ` +
+    `Latest candle: ${t ? t.local : "N/A"}`;
+
+  const targetEl = $("predictionTarget");
+
+  if(targetEl){
+    targetEl.textContent =
+      `Next 1-minute candle: ${formatDate(target,tz)}`;
+  }
 }
 
 async function refreshAnalysis(){
