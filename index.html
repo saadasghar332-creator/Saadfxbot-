@@ -43,11 +43,19 @@
     <small id="dataMessage">Add a Twelve Data key to enable live 1-minute data.</small>
   </section>
 
+  <section class="card auto-refresh-card">
+    <div class="section-head">
+      <h2>Automatic refresh</h2>
+      <span id="refreshStatus" class="refresh-status">Auto-refresh ON</span>
+    </div>
+    <p id="refreshCountdown">Preparing next minute refresh…</p>
+  </section>
+
   <section class="grid">
     <div class="card price">
       <span>USD/JPY</span>
       <strong id="price">—</strong>
-      <small id="change">No live data</small>
+      <small id="change">No live data</small><small id="predictionTarget" class="prediction-target">Next 1-minute candle: —</small>
     </div>
     <div class="card signal-card">
       <span>Signal</span>

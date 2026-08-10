@@ -49,3 +49,11 @@ The market-data timestamp from Twelve Data is UTC. V4.1 converts the candle time
 V4.2 automatically requests fresh 1-minute USD/JPY market data every 60 seconds while the page is open. It shows a countdown to the next refresh and reports whether the latest refresh succeeded.
 
 The app remains paper-trading/research-only. The API key stays in browser local storage and is not committed to GitHub.
+
+## V4.3 timestamp / next-candle fix
+
+The displayed prediction time is no longer the timestamp of the previous completed candle. The model uses the latest completed 1-minute candle as input and labels the result for the **next 1-minute candle**.
+
+For example, if the phone's current minute is **07:27**, the app labels the prediction target **07:28**. It also shows the latest completed candle separately so the data timestamp is not confused with the prediction target.
+
+Automatic refresh is aligned to the start of each new minute (with a short delay for the new candle to become available) instead of simply running 60 seconds after the page was opened.

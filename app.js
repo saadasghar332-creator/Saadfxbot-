@@ -236,20 +236,37 @@ function runPrediction(){
   return {price:candles.at(-1).close,up,down,signal};
 }
 
-function formatCandleTime(utcString){
-  // Twelve Data timestamps are UTC. Convert them to the phone/browser timezone
-  // for display, while keeping the original UTC timestamp visible for reference.
-  const raw=String(utcString).trim();
+function parseUtcDate(utcString){
+  const raw=String(utcString||"").trim();
   const iso=raw.endsWith("Z") ? raw : raw.replace(" ","T")+"Z";
   const d=new Date(iso);
-  if(Number.isNaN(d.getTime())) return {local:raw,utc:raw+" UTC"};
-  const local=new Intl.DateTimeFormat(undefined,{
-    dateStyle:"medium", timeStyle:"medium"
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatDate(d, timeZone){
+  return new Intl.DateTimeFormat(undefined,{
+    timeZone, dateStyle:"medium", timeStyle:"short"
   }).format(d);
-  const utc=new Intl.DateTimeFormat("en-GB",{
-    timeZone:"UTC", dateStyle:"medium", timeStyle:"medium", hour12:false
-  }).format(d)+" UTC";
-  return {local,utc};
+}
+
+function getPredictionTarget(){
+  // The model uses the latest completed candle to predict the NEXT 1-minute candle.
+  // Therefore the displayed result time is one minute ahead, never the previous candle.
+  const now=new Date();
+  now.setSeconds(0,0);
+  now.setMinutes(now.getMinutes()+1);
+  return now;
+}
+
+function formatCandleTime(utcString){
+  const d=parseUtcDate(utcString);
+  if(!d) return {local:String(utcString||""),utc:String(utcString||"")+" UTC"};
+  return {
+    local:formatDate(d, Intl.DateTimeFormat().resolvedOptions().timeZone),
+    utc:new Intl.DateTimeFormat("en-GB",{
+      timeZone:"UTC", dateStyle:"medium", timeStyle:"short", hour12:false
+    }).format(d)+" UTC"
+  };
 }
 
 function renderAnalysis(a){
@@ -265,7 +282,11 @@ function renderAnalysis(a){
     : `Model confidence ${(Math.max(a.up,a.down)*100).toFixed(1)}%.`;
   $("price").dataset.price=a.price;
   const t=formatCandleTime(candles.at(-1).time);
-  $("change").textContent=`Candle time: ${t.local} · Source: ${t.utc}`;
+  const target=getPredictionTarget();
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  $("change").textContent=`Prediction for: ${formatDate(target,tz)} · Latest candle: ${t.local}`;
+  const targetEl=$("predictionTarget");
+  if(targetEl) targetEl.textContent=`Next 1-minute candle: ${formatDate(target,tz)}`;
 }
 
 async function refreshAnalysis(){
@@ -365,16 +386,23 @@ renderRisk();renderStats();
 window.addEventListener("resize",drawChart);
 
 
-// V4.2: automatically refresh market data every 60 seconds.
-// The API key remains in localStorage and is never written into the repository.
+// V4.3: automatically refresh at the start of each new minute.
+// The displayed signal is explicitly for the NEXT 1-minute candle.
 const AUTO_REFRESH_MS = 60 * 1000;
 let autoRefreshTimer = null;
 let countdownTimer = null;
-let nextRefreshAt = Date.now() + AUTO_REFRESH_MS;
+let nextRefreshAt = 0;
 
 function setRefreshStatus(message) {
   const el = $("refreshStatus");
   if (el) el.textContent = message;
+}
+
+function scheduleNextMinuteRefresh(){
+  const now=Date.now();
+  // Refresh shortly after the next minute begins so the newest completed candle
+  // has time to become available from the data provider.
+  nextRefreshAt = (Math.floor(now/60000)+1)*60000 + 3000;
 }
 
 function updateRefreshCountdown() {
@@ -388,40 +416,33 @@ function updateRefreshCountdown() {
 
 async function autoRefreshMarketData() {
   try {
-    // V4.2 expects the existing V4/V4.1 fetch-and-train function to be available.
-    // Try the common function names used by the V4 app.
-    if (typeof fetchAndTrain === "function") {
-      await fetchAndTrain();
-    } else if (typeof fetchAndTrainModel === "function") {
-      await fetchAndTrainModel();
-    } else if (typeof loadMarketData === "function") {
-      await loadMarketData();
-    } else {
-      // Fallback: click the existing Fetch & train button so V4.2 remains
-      // compatible with the existing UI without duplicating API logic.
-      const btn = $("fetchTrain") || $("fetch") || $("train");
-      if (btn) btn.click();
-      else throw new Error("V4 fetch/train function or button was not found.");
-    }
+    setRefreshStatus("Auto-refresh ON · updating…");
+    await refreshAnalysis();
     setRefreshStatus("Auto-refresh ON · updated just now");
   } catch (err) {
     console.error("Automatic market-data refresh failed:", err);
     setRefreshStatus("Auto-refresh ON · refresh failed");
   } finally {
-    nextRefreshAt = Date.now() + AUTO_REFRESH_MS;
+    scheduleNextMinuteRefresh();
     updateRefreshCountdown();
   }
 }
 
 function startAutoRefresh() {
-  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  if (autoRefreshTimer) clearTimeout(autoRefreshTimer);
   if (countdownTimer) clearInterval(countdownTimer);
 
-  nextRefreshAt = Date.now() + AUTO_REFRESH_MS;
+  scheduleNextMinuteRefresh();
   updateRefreshCountdown();
 
-  autoRefreshTimer = setInterval(autoRefreshMarketData, AUTO_REFRESH_MS);
-  countdownTimer = setInterval(updateRefreshCountdown, 1000);
+  const tick=async()=>{
+    await autoRefreshMarketData();
+    const delay=Math.max(250,nextRefreshAt-Date.now());
+    autoRefreshTimer=setTimeout(tick,delay);
+  };
+
+  autoRefreshTimer=setTimeout(tick,Math.max(250,nextRefreshAt-Date.now()));
+  countdownTimer=setInterval(updateRefreshCountdown,1000);
 }
 
 startAutoRefresh();
