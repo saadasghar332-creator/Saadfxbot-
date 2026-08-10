@@ -236,6 +236,22 @@ function runPrediction(){
   return {price:candles.at(-1).close,up,down,signal};
 }
 
+function formatCandleTime(utcString){
+  // Twelve Data timestamps are UTC. Convert them to the phone/browser timezone
+  // for display, while keeping the original UTC timestamp visible for reference.
+  const raw=String(utcString).trim();
+  const iso=raw.endsWith("Z") ? raw : raw.replace(" ","T")+"Z";
+  const d=new Date(iso);
+  if(Number.isNaN(d.getTime())) return {local:raw,utc:raw+" UTC"};
+  const local=new Intl.DateTimeFormat(undefined,{
+    dateStyle:"medium", timeStyle:"medium"
+  }).format(d);
+  const utc=new Intl.DateTimeFormat("en-GB",{
+    timeZone:"UTC", dateStyle:"medium", timeStyle:"medium", hour12:false
+  }).format(d)+" UTC";
+  return {local,utc};
+}
+
 function renderAnalysis(a){
   $("price").textContent=a.price.toFixed(3);
   $("up").textContent=(a.up*100).toFixed(1)+"%";
@@ -248,7 +264,8 @@ function renderAnalysis(a){
     ? `Below model threshold ${(model.threshold*100).toFixed(0)}%.`
     : `Model confidence ${(Math.max(a.up,a.down)*100).toFixed(1)}%.`;
   $("price").dataset.price=a.price;
-  $("change").textContent=`Live candle · ${candles.at(-1).time} UTC`;
+  const t=formatCandleTime(candles.at(-1).time);
+  $("change").textContent=`Candle time: ${t.local} · Source: ${t.utc}`;
 }
 
 async function refreshAnalysis(){

@@ -38,3 +38,7 @@ The model is an educational research baseline, not a profitable trading guarante
 ## GitHub Pages
 
 The frontend files can be hosted on GitHub Pages. The app makes the data request from the browser, so network/CORS or provider-plan restrictions may prevent direct browser access. If that happens, the next upgrade should be a small server-side API proxy.
+
+
+## V4.1 time display fix
+The market-data timestamp from Twelve Data is UTC. V4.1 converts the candle timestamp to the phone/browser local timezone for display and also shows the original UTC source time. The candle timestamp is not the same thing as the current clock time; it identifies the market candle returned by the data provider.
