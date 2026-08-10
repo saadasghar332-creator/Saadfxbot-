@@ -1,27 +1,40 @@
-# USD/JPY Trading Web App
+# USD/JPY Trader V4
 
-A mobile-friendly paper-trading dashboard that can be opened directly in Chrome.
+Mobile-friendly research and paper-trading dashboard.
 
-## Run locally
+## What changed from V3
 
-Just open `index.html` in a browser.
+- Uses real USD/JPY 1-minute OHLC candles through Twelve Data.
+- Removes random demo price/probabilities.
+- Builds features from price history.
+- Trains a small logistic-regression classifier in the browser.
+- Uses a chronological 60% train / 20% validation / 20% test split.
+- Fits feature scaling on the training set only.
+- Chooses the signal threshold from validation data.
+- Reports unseen test accuracy and majority-class baseline.
+- Keeps all order actions paper-only.
 
-## Publish free with GitHub Pages
+## Important API-key note
 
-1. Create a GitHub repository.
-2. Upload `index.html`, `style.css`, `app.js`, and `README.md`.
-3. Repository Settings -> Pages.
-4. Under Build and deployment choose `Deploy from a branch`.
-5. Select `main` and `/root`.
-6. Save.
-7. GitHub will provide the public Pages address.
+This version stores the Twelve Data API key in browser localStorage. It is NOT committed to GitHub, but a browser-stored key should still be considered exposed to the person using that browser. For a public production app, use a server-side proxy/backend and keep the key in an environment variable.
 
-## Current status
+Twelve Data documents `/time_series` for historical OHLC data, supports `1min`, and supports up to 5000 points per request subject to plan/credit limits.
 
-This is a front-end MVP. The signal engine is a DEMO placeholder and does not predict real market direction.
+## Setup
 
-## Next upgrade
+1. Get a Twelve Data API key from their website.
+2. Open the app.
+3. Paste the key into **Market data → API key**.
+4. Tap **Save key**.
+5. Select 1000 candles first.
+6. Tap **Fetch & train**.
+7. Wait for the model evaluation numbers.
+8. Use paper trading only.
 
-Connect the UI to the FastAPI backend and replace the demo signal with the validated ML model. Use a proper licensed market-data provider for live data. Keep paper trading enabled until extensive walk-forward and live-paper testing is complete.
+## Model warning
 
-Do not put API keys, broker passwords, or secret tokens in this repository.
+The model is an educational research baseline, not a profitable trading guarantee. One-minute FX is noisy, and live results can differ because of spread, slippage, latency, data-source differences and regime changes.
+
+## GitHub Pages
+
+The frontend files can be hosted on GitHub Pages. The app makes the data request from the browser, so network/CORS or provider-plan restrictions may prevent direct browser access. If that happens, the next upgrade should be a small server-side API proxy.

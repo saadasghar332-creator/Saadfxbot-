@@ -3,59 +3,96 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>USD/JPY Trading Dashboard</title>
+  <title>USD/JPY Trader V4</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
   <div>
     <h1>USD/JPY Trader</h1>
-    <p>1-minute paper-trading dashboard</p>
+    <p>V4 · 1-minute research & paper-trading dashboard</p>
   </div>
   <span class="badge">PAPER ONLY</span>
 </header>
 
 <main>
+  <section class="card setup">
+    <div class="section-head">
+      <h2>Market data</h2>
+      <span id="dataStatus" class="status">Not connected</span>
+    </div>
+    <p class="muted">V4 uses Twelve Data 1-minute candles. Your API key is stored only in this browser. Do not publish it in GitHub.</p>
+    <div class="form-grid setup-grid">
+      <label>API key
+        <input id="apiKey" type="password" placeholder="Paste your Twelve Data API key">
+      </label>
+      <label>Candles
+        <select id="candleCount">
+          <option value="500">500</option>
+          <option value="1000" selected>1000</option>
+          <option value="2000">2000</option>
+          <option value="5000">5000</option>
+        </select>
+      </label>
+    </div>
+    <div class="setup-actions">
+      <button id="saveKey">Save key</button>
+      <button id="refresh" class="primary">Fetch & train</button>
+      <button id="clearKey" class="neutral">Clear key</button>
+    </div>
+    <small id="dataMessage">Add a Twelve Data key to enable live 1-minute data.</small>
+  </section>
+
   <section class="grid">
     <div class="card price">
       <span>USD/JPY</span>
-      <strong id="price">156.245</strong>
-      <small id="change">Demo market data</small>
+      <strong id="price">—</strong>
+      <small id="change">No live data</small>
     </div>
-
     <div class="card signal-card">
       <span>Signal</span>
       <strong id="signal" class="no-trade">NO TRADE</strong>
-      <small id="reason">Waiting for analysis</small>
+      <small id="reason">Waiting for data and model</small>
     </div>
-
     <div class="card">
       <span>UP probability</span>
-      <strong id="up">50.0%</strong>
+      <strong id="up">—</strong>
       <div class="bar"><i id="upbar"></i></div>
     </div>
-
     <div class="card">
       <span>DOWN probability</span>
-      <strong id="down">50.0%</strong>
+      <strong id="down">—</strong>
       <div class="bar"><i id="downbar"></i></div>
     </div>
+  </section>
+
+  <section class="card">
+    <div class="section-head"><h2>Model evaluation</h2><span id="modelStatus" class="status">Not trained</span></div>
+    <div class="stats model-stats">
+      <div><span>Train rows</span><b id="trainRows">—</b></div>
+      <div><span>Validation rows</span><b id="valRows">—</b></div>
+      <div><span>Test rows</span><b id="testRows">—</b></div>
+      <div><span>Test accuracy</span><b id="testAcc">—</b></div>
+      <div><span>Test baseline</span><b id="testBase">—</b></div>
+      <div><span>Test trades</span><b id="testTrades">—</b></div>
+    </div>
+    <p id="splitNote" class="muted">Chronological split: 60% train / 20% validation / 20% unseen test. Scaling is fit on training data only.</p>
   </section>
 
   <section class="card">
     <h2>Risk calculator</h2>
     <div class="form-grid">
       <label>Account balance
-        <input id="balance" type="number" value="1000">
+        <input id="balance" type="number" value="1000" min="0" step="0.01">
       </label>
       <label>Risk %
-        <input id="risk" type="number" value="1" step="0.1">
+        <input id="risk" type="number" value="1" min="0" step="0.1">
       </label>
       <label>Stop loss (pips)
-        <input id="stop" type="number" value="5">
+        <input id="stop" type="number" value="5" min="0.1" step="0.1">
       </label>
       <label>Take profit (pips)
-        <input id="target" type="number" value="10">
+        <input id="target" type="number" value="10" min="0.1" step="0.1">
       </label>
     </div>
     <div class="risk-result">
@@ -67,7 +104,7 @@
   <section class="card">
     <div class="section-head">
       <h2>Paper trading</h2>
-      <button id="refresh">Refresh analysis</button>
+      <button id="paperRefresh" class="primary">Refresh analysis</button>
     </div>
     <div class="paper-controls">
       <button class="buy" id="paperBuy">PAPER BUY</button>
@@ -78,10 +115,7 @@
   </section>
 
   <section class="card">
-    <div class="section-head">
-      <h2>Performance</h2>
-      <button id="reset">Reset</button>
-    </div>
+    <div class="section-head"><h2>Performance</h2><button id="reset" class="neutral">Reset</button></div>
     <div class="stats">
       <div><span>Balance</span><b id="pBalance">$1,000.00</b></div>
       <div><span>Trades</span><b id="trades">0</b></div>
@@ -98,10 +132,9 @@
   </section>
 
   <section class="warning">
-    <b>Important:</b> This is a research and paper-trading app. The current signal is a demo placeholder and is NOT a reliable market prediction. Do not connect real money until the model, data, execution and risk controls have been independently tested.
+    <b>Important:</b> This remains a research and paper-trading application. A 1-minute model can lose money and probabilities are not guarantees. V4 does not place real orders. Do not connect a live broker until data quality, out-of-sample performance, costs/slippage, execution and risk controls have been independently tested.
   </section>
 </main>
-
 <script src="app.js"></script>
 </body>
 </html>
